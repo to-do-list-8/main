@@ -1,0 +1,24 @@
+[debug] [2024-11-27T05:35:00.662Z] ----------------------------------------------------------------------
+[debug] [2024-11-27T05:35:00.670Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js apps:create android todolist (android) --package-name=com.example.todolist --json --project=todolist-fae63
+[debug] [2024-11-27T05:35:00.671Z] CLI Version:   13.27.0
+[debug] [2024-11-27T05:35:00.671Z] Platform:      win32
+[debug] [2024-11-27T05:35:00.672Z] Node Version:  v20.17.0
+[debug] [2024-11-27T05:35:00.672Z] Time:          Wed Nov 27 2024 14:35:00 GMT+0900 (대한민국 표준시)
+[debug] [2024-11-27T05:35:00.673Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-11-27T05:35:00.686Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-11-27T05:35:00.687Z] > authorizing via signed-in user (zeroweek4324@gmail.com)
+[info] Create your ANDROID app in project todolist-fae63:
+[debug] [2024-11-27T05:35:00.693Z] Checked if tokens are valid: true, expires at: 1732689262459
+[debug] [2024-11-27T05:35:00.693Z] Checked if tokens are valid: true, expires at: 1732689262459
+[debug] [2024-11-27T05:35:00.696Z] >>> [apiv2][query] POST https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps [none]
+[debug] [2024-11-27T05:35:00.696Z] >>> [apiv2][body] POST https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps {"displayName":"todolist (android)","packageName":"com.example.todolist"}
+[debug] [2024-11-27T05:35:01.682Z] <<< [apiv2][status] POST https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps 409
+[debug] [2024-11-27T05:35:01.683Z] <<< [apiv2][body] POST https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps {"error":{"code":409,"message":"Requested entity already exists","status":"ALREADY_EXISTS"}}
+[debug] [2024-11-27T05:35:01.684Z] Request to https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps had HTTP Error: 409, Requested entity already exists
+[debug] [2024-11-27T05:35:02.001Z] FirebaseError: Request to https://firebase.googleapis.com/v1beta1/projects/todolist-fae63/androidApps had HTTP Error: 409, Requested entity already exists
+    at responseToError (C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\responseToError.js:52:12)
+    at RetryOperation._fn (C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\apiv2.js:312:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: Failed to create Android app for project todolist-fae63. See firebase-debug.log for more info.
