@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'search_screen.dart'; // SearchScreen import
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 할 일 데이터 (상태 포함)
   Map<String, List<Map<String, dynamic>>> _tasks = {
+    "루틴": [],
     "과제": [
       {"title": "고급 모바일 프로그래밍 UI", "isChecked": true},
       {"title": "설계패턴 퀴즈", "isChecked": true},
@@ -38,6 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('To Do List'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search), // 돋보기 아이콘
+            onPressed: () {
+              // SearchScreen으로 화면 전환
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
