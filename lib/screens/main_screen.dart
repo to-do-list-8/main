@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import 'alarm_screen.dart';
-import 'search_screen.dart';
 import 'add_screen.dart';
+import 'extra_screen.dart'; // 부가 기능 화면 추가
 
 class MainScreen extends StatefulWidget {
   @override
@@ -16,8 +15,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     HomeScreen(),
     AlarmScreen(),
-    SearchScreen(),
     AddScreen(),
+    ExtraScreen(), // 부가 기능 화면 추가
   ];
 
   void _onTabTapped(int index) {
@@ -29,34 +28,27 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          _screens[_currentIndex], // 현재 선택된 화면
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onTabTapped,
-              type: BottomNavigationBarType.fixed, // 항상 고정
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications),
-                  label: 'Alarm',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.search),
-                  label: 'Search',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.add),
-                  label: 'Add',
-                ),
-              ],
-            ),
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Alarm',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.extension), // 부가 기능 아이콘
+            label: 'Extra',
           ),
         ],
       ),
