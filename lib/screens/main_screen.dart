@@ -3,6 +3,9 @@ import 'home_screen.dart';
 import 'alarm_screen.dart';
 import 'add_screen.dart';
 import 'extra_screen.dart'; // 부가 기능 화면 추가
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 
 class MainScreen extends StatefulWidget {
   @override
