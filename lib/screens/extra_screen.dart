@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '부가 기능 앱',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ExtraScreen(),
+    );
+  }
+}
+
 class ExtraScreen extends StatelessWidget {
   final List<String> dailyRoutines = ['운동하기', '아침 명상', '책 읽기'];
   final Map<String, int> routineStreak = {'운동하기': 5, '아침 명상': 10, '책 읽기': 100};
   final List<Map<String, String>> famousRoutines = [
-    {'name': '스티브 잡스', 'routine': '아침 산책'},
-    {'name': '빌 게이츠', 'routine': '독서'},
-    {'name': '일론 머스크', 'routine': '매일 목표 설정'},
-    {'name': '오프라 윈프리', 'routine': '명상'},
+    {'name': '스티브 잡스', 'routine': '아침 산책', 'image': 'assets/images/steve_jobs.png'},
+    {'name': '빌 게이츠', 'routine': '독서', 'image': 'assets/images/bill_gates.png'},
+    {'name': '일론 머스크', 'routine': '매일 목표 설정', 'image': 'assets/images/elon_musk.png'},
+  ];
+  final List<String> savedDiaries = [
+    '2024/11/27: 눈이 왔다 ☃️',
+    '2024/11/26: 날씨가 추워졌다.'
   ];
 
   void _addFamousRoutine(BuildContext context, String routine) {
@@ -91,6 +111,15 @@ class ExtraScreen extends StatelessWidget {
     return null;
   }
 
+  void _navigateToDiaryList(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiaryListScreen(savedDiaries: savedDiaries),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,20 +176,23 @@ class ExtraScreen extends StatelessWidget {
               }).toList(),
               SizedBox(height: 16),
 
-              // 유명인 루틴 추가 섹션
+              // 유명인 루틴 추천 섹션
               Text(
-                '유명인 루틴 추가',
+                '유명인 루틴 추천',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               ...famousRoutines.map((routine) {
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage(routine['image']!), // 로컬 이미지 표시
+                      radius: 25,
+                    ),
                     title: Text('${routine['name']}'),
                     subtitle: Text('${routine['routine']}'),
                     trailing: ElevatedButton(
-                      onPressed: () =>
-                          _addFamousRoutine(context, routine['routine']!),
+                      onPressed: () => _addFamousRoutine(context, routine['routine']!),
                       child: Text('추가'),
                     ),
                   ),
@@ -168,37 +200,53 @@ class ExtraScreen extends StatelessWidget {
               }).toList(),
               SizedBox(height: 16),
 
-              // 일기 기능 섹션
+              // 일기 쓰기 및 보기 버튼 섹션
               Text(
                 '일기',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              Card(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  title: Text('일기를 작성하세요'),
-                  trailing: ElevatedButton(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
                     onPressed: () => _writeDiary(context),
-                    child: Text('쓰기'),
+                    child: Text('일기 쓰기'),
                   ),
-                ),
-              ),
-              Text(
-                '저장된 일기',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              ...['2024/11/27: 눈이 왔다 ☃️', '2024/11/26: 날씨가 추워졌다.']
-                  .map((diary) {
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 4),
-                  child: ListTile(
-                    title: Text(diary),
+                  ElevatedButton(
+                    onPressed: () => _navigateToDiaryList(context),
+                    child: Text('저장된 일기 보기'),
                   ),
-                );
-              }).toList(),
+                ],
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class DiaryListScreen extends StatelessWidget {
+  final List<String> savedDiaries;
+
+  const DiaryListScreen({Key? key, required this.savedDiaries}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('저장된 일기'),
+      ),
+      body: ListView.builder(
+        itemCount: savedDiaries.length,
+        itemBuilder: (context, index) {
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: ListTile(
+              title: Text(savedDiaries[index]),
+            ),
+          );
+        },
       ),
     );
   }
