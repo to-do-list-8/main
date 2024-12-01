@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'main_page.dart';
+import 'main_screen.dart';
 import 'register_page.dart';
-import 'practice_page.dart';
+import 'reset_password_page.dart';
 
 
 class LoginPage extends StatelessWidget {
@@ -73,7 +73,7 @@ class LoginPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      MaterialPageRoute(builder: (context) => MainScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -112,7 +112,7 @@ class LoginPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const PracticePage()),
+                                builder: (context) => ResetPasswordPage()),
                           );
                         },
                         child: const Text('Forgot your password?',
