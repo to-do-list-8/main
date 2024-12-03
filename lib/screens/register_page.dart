@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -20,16 +20,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _register() async {
     setState(() {
-      // 에러 메시지를 초기화
       _emailError = null;
       _passwordError = null;
       _confirmPasswordError = null;
     });
 
-    // 유효성 검사
     if (!_emailController.text.contains('@') || !_emailController.text.contains('.')) {
       setState(() {
-        _emailError = "email 양식에 맞지 않습니다!";
+        _emailError = "Email 양식에 맞지 않습니다!";
       });
       return;
     }
@@ -101,9 +99,16 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 이메일 입력 필드
+                const Text(
+                  '회원가입',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -112,18 +117,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    errorText: _emailError,
                   ),
                 ),
-                if (_emailError != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _emailError!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ],
                 const SizedBox(height: 16),
-
-                // 비밀번호 입력 필드
                 TextField(
                   controller: _passwordController,
                   decoration: InputDecoration(
@@ -132,19 +129,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    errorText: _passwordError,
                   ),
                   obscureText: true,
                 ),
-                if (_passwordError != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _passwordError!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ],
                 const SizedBox(height: 16),
-
-                // 비밀번호 확인 입력 필드
                 TextField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
@@ -153,34 +142,23 @@ class _RegisterPageState extends State<RegisterPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    errorText: _confirmPasswordError,
                   ),
                   obscureText: true,
                 ),
-                if (_confirmPasswordError != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _confirmPasswordError!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _register,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
-                ],
-                const SizedBox(height: 16),
-
-                // 생성하기 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _register,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: const Text(
-                      '생성하기',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  child: const Text(
+                    '생성하기',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],

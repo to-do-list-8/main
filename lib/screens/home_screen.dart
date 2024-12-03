@@ -3,6 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'search_screen.dart'; // SearchScreen import
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -12,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime _focusedDay = DateTime.now();
 
   // 할 일 데이터 (상태 포함)
-  Map<String, List<Map<String, dynamic>>> _tasks = {
+  final Map<String, List<Map<String, dynamic>>> _tasks = {
     "루틴": [],
     "과제": [
       {"title": "고급 모바일 프로그래밍 UI", "isChecked": true},
@@ -39,15 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('To Do List'),
+        title: const Text('To Do List'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search), // 돋보기 아이콘
+            icon: const Icon(Icons.search), // 돋보기 아이콘
             onPressed: () {
               // SearchScreen으로 화면 전환
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SearchScreen()),
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
               );
             },
           ),
@@ -75,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // 선택한 날짜 출력
           Text(
             "${_selectedDay.year}.${_selectedDay.month.toString().padLeft(2, '0')}.${_selectedDay.day.toString().padLeft(2, '0')} 할 일",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           // 할일 리스트

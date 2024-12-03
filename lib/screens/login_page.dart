@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'main_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'main_screen.dart';
 import 'register_page.dart';
-import 'practice_page.dart';
-
+import 'email_verification_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -11,6 +11,42 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
+
+    void _login() async {
+      try {
+        // Firebase Auth를 사용한 로그인
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        // 로그인 성공 시 MainScreen으로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      } on FirebaseAuthException catch (e) {
+        String errorMessage = '로그인 실패.';
+
+        if (e.code == 'user-not-found') {
+          errorMessage = '사용자를 찾을 수 없습니다.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = '비밀번호가 잘못되었습니다.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = '이메일 형식이 잘못되었습니다.';
+        }
+
+        // 에러 메시지를 화면에 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } catch (e) {
+        // 기타 오류 처리
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('알 수 없는 오류가 발생했습니다: $e')),
+        );
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -70,12 +106,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
-                    );
-                  },
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(
@@ -103,7 +134,8 @@ class LoginPage extends StatelessWidget {
                                 builder: (context) => const RegisterPage()),
                           );
                         },
-                        child: const Text('Register',
+                        child: const Text(
+                          'Register',
                           style: TextStyle(color: Colors.black),
                         ),
                       ),
@@ -112,10 +144,12 @@ class LoginPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const PracticePage()),
+                                builder: (context) =>
+                                    EmailVerificationPage()),
                           );
                         },
-                        child: const Text('Forgot your password?',
+                        child: const Text(
+                          'Forgot your password?',
                           style: TextStyle(color: Colors.black),
                         ),
                       ),
@@ -127,7 +161,7 @@ class LoginPage extends StatelessWidget {
           ),
         ),
       ),
-      backgroundColor: Colors.grey[200], // 전체 배경색
+      backgroundColor: Colors.grey[200],
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
+
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
@@ -29,7 +31,7 @@ class _SearchScreenState extends State<SearchScreen> {
       }
       spans.add(TextSpan(
         text: text.substring(match.start, match.end),
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.red, // 하이라이트 색상
           fontWeight: FontWeight.bold,
         ),
@@ -42,20 +44,20 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     return RichText(
-      text: TextSpan(style: TextStyle(color: Colors.black), children: spans),
+      text: TextSpan(style: const TextStyle(color: Colors.black), children: spans),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('검색 🔍')),
+      appBar: AppBar(title: const Text('검색 🔍')),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: '검색',
               ),
@@ -74,7 +76,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     .where((item) => item.toLowerCase().contains(_searchQuery.toLowerCase())) // 검색 조건
                     .toList();
 
-                if (items.isEmpty) return SizedBox.shrink(); // 검색 결과 없을 시 빈 위젯 반환
+                if (items.isEmpty) return const SizedBox.shrink(); // 검색 결과 없을 시 빈 위젯 반환
 
                 return ExpansionTile(
                   title: Text(category),
