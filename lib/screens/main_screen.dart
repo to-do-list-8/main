@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'alarm_screen.dart';
 import 'add_screen.dart';
-import 'diary_screen.dart';
+import 'extra_screen.dart'; // 부가 기능 화면 추가
+
+
 
 class MainScreen extends StatefulWidget {
   @override
@@ -16,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     AlarmScreen(),
     AddScreen(),
-    DiaryScreen(),
+    ExtraScreen(), // 부가 기능 화면 추가
   ];
 
   void _onTabTapped(int index) {
@@ -30,28 +32,25 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.grey[200], // 네비게이션 바 배경색 설정
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black, // 선택된 아이콘 색상: 검은색
-        unselectedItemColor: Colors.black54, // 선택되지 않은 아이콘 색상: 흰색
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Chart',
+            icon: Icon(Icons.notifications),
+            label: 'Alarm',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
             label: 'Add',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Diary',
+            icon: Icon(Icons.extension), // 부가 기능 아이콘
+            label: 'Extra',
           ),
         ],
       ),
