@@ -75,7 +75,7 @@ class DataScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('데이터 페이지'),
+        title: const Text('완료율'),
       ),
       body: FutureBuilder<List<TodoItem>>(
         future: fetchTodos(),
@@ -95,43 +95,51 @@ class DataScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 전체 완료율 섹션
                 const Text(
                   '전체 완료율',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                FutureBuilder<double>(
-                  future: getOverallCompletionRate(todos),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    double completionRate = snapshot.data ?? 0.0;
-                    return Column(
-                      children: [
-                        SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                value: completionRate / 100,
-                                strokeWidth: 8,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                              ),
-                              Text(
-                                '${completionRate.toStringAsFixed(1)}%',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
+                Center( // 가운데 정렬을 위한 Center 위젯 추가
+                  child: FutureBuilder<double>(
+                    future: getOverallCompletionRate(todos),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      double completionRate = snapshot.data ?? 0.0;
+                      return Column(
+                        children: [
+                          SizedBox(
+                            width: 200, // 크기 조정
+                            height: 200, // 크기 조정
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: completionRate / 100,
+                                  strokeWidth: 18, // 두께 조정
+                                  backgroundColor: Colors.grey[300],
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                ),
+                                Text(
+                                  '${completionRate.toStringAsFixed(1)}%',
+                                  style: const TextStyle(fontSize: 24), // 텍스트 크기 조정
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 const SizedBox(height: 20),
+                // 구분선 추가
+                const Divider(height: 40, thickness: 2, color: Colors.grey),
+                const SizedBox(height: 20),
+                // 카테고리별 완료율 섹션
                 const Text(
                   '카테고리별 완료율',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -185,17 +193,20 @@ class DataScreen extends StatelessWidget {
     );
   }
 
+
+
+
   Color _getColor(String category) {
     switch (category) {
-      case 'homework':
+      case '과제':
         return Colors.green;
-      case 'school':
+      case '학교':
         return Colors.blue;
       // case '취미':
       //   return Colors.orange;
-      case 'exercise':
+      case '운동':
         return Colors.purple;
-      case 'routain':
+      case '루틴':
         return Colors.teal;
       default:
         return Colors.grey;
