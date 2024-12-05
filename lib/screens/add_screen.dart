@@ -1,254 +1,257 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddScreen extends StatefulWidget {
+  const AddScreen({Key? key}) : super(key: key);
+
   @override
   _AddScreenState createState() => _AddScreenState();
 }
 
 class _AddScreenState extends State<AddScreen> {
-  DateTime _selectedDay = DateTime.now();
-  DateTime _focusedDay = DateTime.now();
-  String _selectedCategory = "과제";
-  List<String> _categories = ["과제", "학교", "운동"];
-  TimeOfDay _selectedTime = TimeOfDay(hour: 8, minute: 0); // 초기 시간
-  bool _isAm = true; // AM/PM 상태
+  final TextEditingController _nameController = TextEditingController();
+  String? _selectedCategory;
+  DateTime? _startDate;
+  TimeOfDay? _startTime;
+  DateTime? _endDate;
+  TimeOfDay? _endTime;
 
-  // 카테고리 추가
-  void _addCategory(String category) {
-    setState(() {
-      _categories.add(category);
-    });
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // 카테고리 삭제
-  void _removeCategory(String category) {
-    setState(() {
-      _categories.remove(category);
-      if (_categories.isNotEmpty) {
-        _selectedCategory = _categories.first; // 첫 번째 카테고리로 선택
-      } else {
-        _selectedCategory = ""; // 선택된 카테고리 초기화
-      }
-    });
-  }
+  void _addDataToFirebase() async {
+    try {
+      User? user = _auth.currentUser;
 
-  // 카테고리 수정
-  void _editCategory(String oldCategory, String newCategory) {
-    setState(() {
-      int index = _categories.indexOf(oldCategory);
-      if (index != -1) {
-        _categories[index] = newCategory;
-        if (_selectedCategory == oldCategory) {
-          _selectedCategory = newCategory;
-        }
-      }
-    });
-  }
-
-  // 다이얼로그로 새 카테고리 추가
-  void _showAddCategoryDialog() {
-    TextEditingController _controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('새 카테고리 추가'),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: '카테고리 이름 입력'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                _addCategory(_controller.text);
-                Navigator.pop(context);
-              },
-              child: Text('추가'),
-            ),
-          ],
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('사용자가 로그인되어 있지 않습니다.')),
         );
-      },
-    );
-  }
+        return;
+      }
 
-  // 다이얼로그로 카테고리 수정
-  void _showEditCategoryDialog(String oldCategory) {
-    TextEditingController _controller = TextEditingController(
-        text: oldCategory);
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('카테고리 수정'),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: '새 카테고리 이름 입력'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                _editCategory(oldCategory, _controller.text);
-                Navigator.pop(context);
-              },
-              child: Text('수정'),
-            ),
-          ],
+      if (_nameController.text.isEmpty ||
+          _selectedCategory == null ||
+          _startDate == null ||
+          _startTime == null ||
+          _endDate == null ||
+          _endTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('모든 필드를 입력해 주세요.')),
         );
-      },
-    );
-  }
+        return;
+      }
 
-  // 시간 선택
-  void _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime,
-    );
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
+      // 시작 날짜와 시간, 끝 날짜와 시간 병합
+      DateTime fullStartDate = DateTime(
+        _startDate!.year,
+        _startDate!.month,
+        _startDate!.day,
+        _startTime!.hour,
+        _startTime!.minute,
+      );
+      DateTime fullEndDate = DateTime(
+        _endDate!.year,
+        _endDate!.month,
+        _endDate!.day,
+        _endTime!.hour,
+        _endTime!.minute,
+      );
+
+      // Firestore에 데이터 추가
+      await _firestore.collection('schedule').doc(user.uid).update({
+        "data": FieldValue.arrayUnion([
+          {
+            "category": _selectedCategory,
+            "name": _nameController.text,
+            "s_date": Timestamp.fromDate(fullStartDate),
+            "f_date": Timestamp.fromDate(fullEndDate),
+            "check": false,
+          }
+        ])
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('할 일이 성공적으로 추가되었습니다.')),
+      );
+
+      // 입력 필드 초기화
+      _nameController.clear();
+      setState(() {
+        _selectedCategory = null;
+        _startDate = null;
+        _startTime = null;
+        _endDate = null;
+        _endTime = null;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('데이터 추가 실패: $e')),
+      );
     }
+  }
+
+  Future<DateTime?> _pickDate(BuildContext context, DateTime initialDate) async {
+    return await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+  }
+
+  Future<TimeOfDay?> _pickTime(BuildContext context, TimeOfDay initialTime) async {
+    return await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('할 일 추가'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: _showAddCategoryDialog, // 새 카테고리 추가
-          ),
-        ],
+        title: const Text('할 일 추가'),
+        backgroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'To Do',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: '할 일',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              items: _categories
-                  .map((category) =>
-                  DropdownMenuItem(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(category),
-                        IconButton(
-                          icon: Icon(Icons.edit, size: 18),
-                          onPressed: () =>
-                              _showEditCategoryDialog(category), // 카테고리 수정
-                        ),
-                      ],
-                    ),
-                    value: category,
-                  ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: '카테고리',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TableCalendar(
-              focusedDay: _focusedDay,
-              firstDay: DateTime(2000),
-              lastDay: DateTime(2100),
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Ends',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: '제목',
+                  hintText: '할 일을 입력해 주세요',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _selectTime, // 시간 선택
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${_selectedTime.format(context)}', // 선택된 시간 표시
-                          style: TextStyle(fontSize: 16),
-                        ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+                items: ["과제", "학교", "운동", "루틴"]
+                    .map((category) => DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                ))
+                    .toList(),
+                decoration: InputDecoration(
+                  labelText: '카테고리 선택',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        DateTime? pickedDate = await _pickDate(context, DateTime.now());
+                        if (pickedDate != null) {
+                          setState(() {
+                            _startDate = pickedDate;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _startDate == null
+                            ? '시작 날짜 선택'
+                            : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}',
                       ),
                     ),
-                    SizedBox(width: 8),
-                    ToggleButtons(
-                      isSelected: [_isAm, !_isAm],
-                      onPressed: (index) {
-                        setState(() {
-                          _isAm = index == 0;
-                        });
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        TimeOfDay? pickedTime = await _pickTime(context, TimeOfDay.now());
+                        if (pickedTime != null) {
+                          setState(() {
+                            _startTime = pickedTime;
+                          });
+                        }
                       },
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('AM', style: TextStyle(fontSize: 16)),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('PM', style: TextStyle(fontSize: 16)),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(8),
+                      child: Text(
+                        _startTime == null
+                            ? '시작 시간 선택'
+                            : '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}',
+                      ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        DateTime? pickedDate = await _pickDate(context, DateTime.now());
+                        if (pickedDate != null) {
+                          setState(() {
+                            _endDate = pickedDate;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _endDate == null
+                            ? '마지막 날짜 선택'
+                            : '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        TimeOfDay? pickedTime = await _pickTime(context, TimeOfDay.now());
+                        if (pickedTime != null) {
+                          setState(() {
+                            _endTime = pickedTime;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _endTime == null
+                            ? '마지막 시간 선택'
+                            : '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _addDataToFirebase,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-              ],
-            ),
-          ],
+                child: const Text(
+                  '추가',
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      backgroundColor: Colors.white,
     );
   }
 }

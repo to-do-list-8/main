@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AlarmScreen extends StatefulWidget {
+  const AlarmScreen({super.key});
+
   @override
   _AlarmScreenState createState() => _AlarmScreenState();
 }
 
 class _AlarmScreenState extends State<AlarmScreen> {
   // 초기 알림 리스트
-  List<String> _alarms = [
-    '2024/10/02 고급 모바일 프로그래밍 UI',
-    '2024/10/02 설계패턴 퀴즈',
-    '2024/10/02 네트워크 프로그래밍 과제',
-    '2024/10/08 고급 모바일 프로그래밍',
+  final List<String> _alarms = [
+    '2024/12/06 고급 모바일 프로그래밍 UI',
+    '2024/12/06 설계패턴 퀴즈',
+    '2024/12/06 네트워크 프로그래밍 과제',
+    '2024/12/06 고급 모바일 프로그래밍',
   ];
 
   // 알림 삭제 함수
@@ -24,7 +26,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('알림 🔔')),
+      appBar: AppBar(title: const Text('알림 🔔')),
       body: ListView.builder(
         itemCount: _alarms.length,
         itemBuilder: (context, index) {
@@ -40,7 +42,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text(
                     '-',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

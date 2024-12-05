@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EmailVerificationPage extends StatefulWidget {
+  const EmailVerificationPage({super.key});
+
   @override
   _EmailVerificationPageState createState() => _EmailVerificationPageState();
 }

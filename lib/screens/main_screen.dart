@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'data_screen.dart';
 import 'home_screen.dart';
 import 'alarm_screen.dart';
 import 'add_screen.dart';
@@ -19,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     AlarmScreen(),
     AddScreen(),
     ExtraScreen(), // 부가 기능 화면 추가
+    DataScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -51,6 +53,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.extension), // 부가 기능 아이콘
             label: 'Extra',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.extension),
+          label: 'Data',
           ),
         ],
       ),
