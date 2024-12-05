@@ -23,7 +23,7 @@ class DataScreen extends StatelessWidget {
   // final String UID; // 문서 ID를 저장할 변수
   // DataScreen({required this.UID}); // 생성자에서 문서 ID를 받음
 
-  final String documentId = 'GRhRx2Yt2NUuyEHajIWfkCIIXaj1'; // 문서 ID
+  final String documentId = 'AJ8ZGfedesY0LiogDF5hdNilHFQ2'; // 문서 ID
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
