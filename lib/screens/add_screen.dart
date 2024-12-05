@@ -10,14 +10,15 @@ class AddScreen extends StatefulWidget {
 }
 
 class _AddScreenState extends State<AddScreen> {
-  final TextEditingController _dataController = TextEditingController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   final TextEditingController _nameController = TextEditingController();
   String? _selectedCategory;
   DateTime? _startDate;
+  TimeOfDay? _startTime;
   DateTime? _endDate;
+  TimeOfDay? _endTime;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _addDataToFirebase() async {
     try {
@@ -25,33 +26,86 @@ class _AddScreenState extends State<AddScreen> {
 
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No user is currently logged in.')),
+          const SnackBar(content: Text('사용자가 로그인되어 있지 않습니다.')),
         );
         return;
       }
 
-      // 데이터 배열 추가
+      if (_nameController.text.isEmpty ||
+          _selectedCategory == null ||
+          _startDate == null ||
+          _startTime == null ||
+          _endDate == null ||
+          _endTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('모든 필드를 입력해 주세요.')),
+        );
+        return;
+      }
+
+      // 시작 날짜와 시간, 끝 날짜와 시간 병합
+      DateTime fullStartDate = DateTime(
+        _startDate!.year,
+        _startDate!.month,
+        _startDate!.day,
+        _startTime!.hour,
+        _startTime!.minute,
+      );
+      DateTime fullEndDate = DateTime(
+        _endDate!.year,
+        _endDate!.month,
+        _endDate!.day,
+        _endTime!.hour,
+        _endTime!.minute,
+      );
+
+      // Firestore에 데이터 추가
       await _firestore.collection('schedule').doc(user.uid).update({
         "data": FieldValue.arrayUnion([
           {
             "category": _selectedCategory,
             "name": _nameController.text,
-            "s_date": _startDate != null ? Timestamp.fromDate(_startDate!) : null,
-            "f_date": _endDate != null ? Timestamp.fromDate(_endDate!) : null,
+            "s_date": Timestamp.fromDate(fullStartDate),
+            "f_date": Timestamp.fromDate(fullEndDate),
             "check": false,
-            "count": 0,
           }
         ])
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('할 일 목록이 추가되었습니다.')),
+        const SnackBar(content: Text('할 일이 성공적으로 추가되었습니다.')),
       );
+
+      // 입력 필드 초기화
+      _nameController.clear();
+      setState(() {
+        _selectedCategory = null;
+        _startDate = null;
+        _startTime = null;
+        _endDate = null;
+        _endTime = null;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add data: $e')),
+        SnackBar(content: Text('데이터 추가 실패: $e')),
       );
     }
+  }
+
+  Future<DateTime?> _pickDate(BuildContext context, DateTime initialDate) async {
+    return await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+  }
+
+  Future<TimeOfDay?> _pickTime(BuildContext context, TimeOfDay initialTime) async {
+    return await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
   }
 
   @override
@@ -100,46 +154,84 @@ class _AddScreenState extends State<AddScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _startDate = pickedDate;
-                    });
-                  }
-                },
-                child: Text(
-                  _startDate == null
-                      ? '시작 날짜 선택'
-                      : 'Start Date: ${_startDate!.toLocal()}'.split(' ')[0],
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        DateTime? pickedDate = await _pickDate(context, DateTime.now());
+                        if (pickedDate != null) {
+                          setState(() {
+                            _startDate = pickedDate;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _startDate == null
+                            ? '시작 날짜 선택'
+                            : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        TimeOfDay? pickedTime = await _pickTime(context, TimeOfDay.now());
+                        if (pickedTime != null) {
+                          setState(() {
+                            _startTime = pickedTime;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _startTime == null
+                            ? '시작 시간 선택'
+                            : '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _endDate = pickedDate;
-                    });
-                  }
-                },
-                child: Text(
-                  _endDate == null
-                      ? '마지막 날짜 선택'
-                      : 'End Date: ${_endDate!.toLocal()}'.split(' ')[0],
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        DateTime? pickedDate = await _pickDate(context, DateTime.now());
+                        if (pickedDate != null) {
+                          setState(() {
+                            _endDate = pickedDate;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _endDate == null
+                            ? '마지막 날짜 선택'
+                            : '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        TimeOfDay? pickedTime = await _pickTime(context, TimeOfDay.now());
+                        if (pickedTime != null) {
+                          setState(() {
+                            _endTime = pickedTime;
+                          });
+                        }
+                      },
+                      child: Text(
+                        _endTime == null
+                            ? '마지막 시간 선택'
+                            : '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               ElevatedButton(

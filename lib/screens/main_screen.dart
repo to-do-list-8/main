@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'alarm_screen.dart';
+import 'data_screen.dart';
 import 'add_screen.dart';
 import 'diary_screen.dart';
 
@@ -14,7 +14,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     HomeScreen(),
-    AlarmScreen(),
+    DataScreen(),
     AddScreen(),
     DiaryScreen(),
   ];
@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Chart',
+            label: 'Data',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add),
