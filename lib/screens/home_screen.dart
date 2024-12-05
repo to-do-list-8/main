@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('홈 화면'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search), // 돋보기 아이콘 버튼
+            icon: const Icon(Icons.search),
             onPressed: () {
               Navigator.push(
                 context,
@@ -92,6 +92,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 _focusedDay = focusedDay;
               });
             },
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                return _buildMarkers(date);
+              },
+            ),
           ),
           const SizedBox(height: 20),
           Text(
@@ -104,12 +109,19 @@ class _HomeScreenState extends State<HomeScreen> {
               children: _tasks.entries.map((entry) {
                 String category = entry.key;
                 List<Map<String, dynamic>> tasks = entry.value.where((task) {
-                  DateTime? taskDate = task['s_date']?.toDate();
-                  return taskDate != null && isSameDay(taskDate, _selectedDay);
+                  DateTime? startDate = task['s_date']?.toDate();
+                  DateTime? endDate = task['f_date']?.toDate();
+
+                  return startDate != null &&
+                      endDate != null &&
+                      (_selectedDay.isAtSameMomentAs(startDate) ||
+                          _selectedDay.isAtSameMomentAs(endDate) ||
+                          (_selectedDay.isAfter(startDate) &&
+                              _selectedDay.isBefore(endDate)));
                 }).toList();
 
                 if (tasks.isEmpty) {
-                  return SizedBox.shrink(); // 해당 카테고리에 할 일이 없으면 표시하지 않음
+                  return SizedBox.shrink();
                 }
 
                 return ExpansionTile(
@@ -128,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       subtitle: Text(
-                        '${task['s_date']?.toDate().toLocal().toString().substring(11, 16) ?? ''} ~ ${task['f_date']?.toDate().toLocal().toString().substring(11, 16) ?? ''}',
+                        '${task['s_date']?.toDate().toLocal().toString().substring(0, 16) ?? ''} ~ ${task['f_date']?.toDate().toLocal().toString().substring(0, 16) ?? ''}',
                       ),
                       trailing: Checkbox(
                         value: task['check'] ?? false,
@@ -147,7 +159,63 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> updateTaskStatus(String category, Map<String, dynamic> task, bool? isChecked) async {
+  Widget _buildMarkers(DateTime date) {
+    List<String> categories = [];
+
+    _tasks.forEach((category, tasks) {
+      for (var task in tasks) {
+        DateTime? startDate = task['s_date']?.toDate();
+        DateTime? endDate = task['f_date']?.toDate();
+
+        if (startDate != null &&
+            endDate != null &&
+            (date.isAtSameMomentAs(startDate) ||
+                date.isAtSameMomentAs(endDate) ||
+                (date.isAfter(startDate) && date.isBefore(endDate)))) {
+          categories.add(category);
+        }
+      }
+    });
+
+    if (categories.isEmpty) return SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: categories.map((category) {
+        Color markerColor;
+
+        switch (category) {
+          case "과제":
+            markerColor = Colors.green;
+            break;
+          case "학교":
+            markerColor = Colors.blueAccent;
+            break;
+          case "운동":
+            markerColor = Colors.deepPurpleAccent;
+            break;
+          case "루틴":
+            markerColor = Colors.amber;
+            break;
+          default:
+            markerColor = Colors.grey;
+        }
+
+        return Container(
+          width: 6,
+          height: 6,
+          margin: const EdgeInsets.symmetric(horizontal: 1),
+          decoration: BoxDecoration(
+            color: markerColor,
+            shape: BoxShape.circle,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> updateTaskStatus(
+      String category, Map<String, dynamic> task, bool? isChecked) async {
     try {
       User? user = _auth.currentUser;
 
